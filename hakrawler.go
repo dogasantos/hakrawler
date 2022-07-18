@@ -181,8 +181,7 @@ func main() {
 					})
 					
 				}
-			}
-			else{
+			} else {
 				c.OnHTML("body", func(e *colly.HTMLElement) {
 					dom := e.DOM
 					inputs := dom.Find("input")
