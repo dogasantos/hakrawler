@@ -176,7 +176,6 @@ func main() {
 						printResultOnMatch(e.Request.URL.String(), e.Attr("src"), "img",  results, e)
 					}
 				})
-				
 			}
 			if *findpassform {
 				c.OnHTML("body", func(e *colly.HTMLElement) {
