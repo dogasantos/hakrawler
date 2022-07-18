@@ -123,59 +123,6 @@ func main() {
 			// Set parallelism
 			c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: *threads})
 
-			// Print every href found, and visit it
-			c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-				link := e.Attr("href")
-				if *matchstr != "" {
-					if strings.Contains(link, *matchstr){
-						printResultOnMatch(e.Request.URL.String(), link, "href", results, e)
-					}
-				} else {
-					printResult(link, "href", *showSource, *showJson, results, e)
-				}
-				e.Request.Visit(link)
-			})
-
-			// find and print all the JavaScript files
-			c.OnHTML("script[src]", func(e *colly.HTMLElement) {
-				if *matchstr != "" {
-					if strings.Contains(e.Attr("src"), *matchstr) {
-						printResultOnMatch(e.Request.URL.String(), e.Attr("src"), "script", results, e)
-					}
-				} else {
-					printResult(e.Attr("src"), "script", *showSource, *showJson, results, e)
-				}
-			})
-	
-	
-			// find and print all the form action URLs
-			c.OnHTML("form[action]", func(e *colly.HTMLElement) {
-				if *matchstr != "" {
-					if strings.Contains(e.Attr("src"),*matchstr){
-						printResultOnMatch(e.Request.URL.String(), e.Attr("action"), "form", results, e)
-					}
-				} else {
-					printResult(e.Attr("action"), "form", *showSource, *showJson, results, e)
-					
-				}
-			})
-	
-			if *matchstr != "" {
-				// Print every CSS found
-				c.OnHTML("link[href]", func(e *colly.HTMLElement) {
-					if strings.Contains(e.Attr("href"), *matchstr){ 
-						printResultOnMatch(e.Request.URL.String(), e.Attr("href"), "css",  results, e)
-					}
-				})
-
-				// Print every IMG found
-				c.OnHTML("img[src]", func(e *colly.HTMLElement) {
-					if strings.Contains(e.Attr("src"), *matchstr){
-						printResultOnMatch(e.Request.URL.String(), e.Attr("src"), "img",  results, e)
-					}
-				})
-			}
-	
 			if *findpassform {
 				c.OnHTML("body", func(e *colly.HTMLElement) {
 					dom := e.DOM
@@ -188,8 +135,63 @@ func main() {
 							printResultOnMatch(e.Request.URL.String(), idfield, "formPassword",  results, e)
 						}
 					}
+					e.Request.Visit(link)
 				})
+			} else {
+				// Print every href found, and visit it
+				c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+					link := e.Attr("href")
+					if *matchstr != "" {
+						if strings.Contains(link, *matchstr){
+							printResultOnMatch(e.Request.URL.String(), link, "href", results, e)
+						}
+					} else {
+						printResult(link, "href", *showSource, *showJson, results, e)
+					}
+					e.Request.Visit(link)
+				})
+
+				// find and print all the JavaScript files
+				c.OnHTML("script[src]", func(e *colly.HTMLElement) {
+					if *matchstr != "" {
+						if strings.Contains(e.Attr("src"), *matchstr) {
+							printResultOnMatch(e.Request.URL.String(), e.Attr("src"), "script", results, e)
+						}
+					} else {
+						printResult(e.Attr("src"), "script", *showSource, *showJson, results, e)
+					}
+				})
+		
+		
+				// find and print all the form action URLs
+				c.OnHTML("form[action]", func(e *colly.HTMLElement) {
+					if *matchstr != "" {
+						if strings.Contains(e.Attr("src"),*matchstr){
+							printResultOnMatch(e.Request.URL.String(), e.Attr("action"), "form", results, e)
+						}
+					} else {
+						printResult(e.Attr("action"), "form", *showSource, *showJson, results, e)
+						
+					}
+				})
+		
+				if *matchstr != "" {
+					// Print every CSS found
+					c.OnHTML("link[href]", func(e *colly.HTMLElement) {
+						if strings.Contains(e.Attr("href"), *matchstr){ 
+							printResultOnMatch(e.Request.URL.String(), e.Attr("href"), "css",  results, e)
+						}
+					})
+
+					// Print every IMG found
+					c.OnHTML("img[src]", func(e *colly.HTMLElement) {
+						if strings.Contains(e.Attr("src"), *matchstr){
+							printResultOnMatch(e.Request.URL.String(), e.Attr("src"), "img",  results, e)
+						}
+					})
+				}
 			}
+			
 	
 	
 			// add the custom headers
