@@ -135,7 +135,7 @@ func main() {
 							printResultOnMatch(e.Request.URL.String(), idfield, "formPassword",  results, e)
 						}
 					}
-					e.Request.Visit(link)
+					e.Request.Visit(e.Attr("href"))
 				})
 			} else {
 				// Print every href found, and visit it
