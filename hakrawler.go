@@ -101,7 +101,7 @@ func main() {
 				// default user agent header
 				colly.UserAgent("Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0"),
 				// set custom headers
-				// colly.Headers(headers),
+				//colly.Headers(headers),
 				// limit crawling to the domain of the specified URL
 				colly.AllowedDomains(allowed_domains...),
 				// set MaxDepth to the specified depth
@@ -120,7 +120,6 @@ func main() {
 				c.AllowedDomains = nil
 				c.URLFilters = []*regexp.Regexp{regexp.MustCompile(".*(\\.|\\/\\/)" + strings.ReplaceAll(hostname, ".", "\\.") + "((#|\\/|\\?).*)?")}
 			}
-
 			// Set parallelism
 			c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: *threads})
 
@@ -147,7 +146,8 @@ func main() {
 					printResult(e.Attr("src"), "script", *showSource, *showJson, results, e)
 				}
 			})
-
+	
+	
 			// find and print all the form action URLs
 			c.OnHTML("form[action]", func(e *colly.HTMLElement) {
 				if *matchstr != "" {
@@ -159,7 +159,7 @@ func main() {
 					
 				}
 			})
-
+	
 			if *matchstr != "" {
 				// Print every CSS found
 				c.OnHTML("link[href]", func(e *colly.HTMLElement) {
@@ -175,7 +175,7 @@ func main() {
 					}
 				})
 			}
-			
+	
 			if *findpassform {
 				c.OnHTML("body", func(e *colly.HTMLElement) {
 					dom := e.DOM
@@ -190,7 +190,8 @@ func main() {
 					}
 				})
 			}
-
+	
+	
 			// add the custom headers
 			if headers != nil {
 				c.OnRequest(func(r *colly.Request) {
@@ -199,7 +200,7 @@ func main() {
 					}
 				})
 			}
-
+			
 			if *proxy != "" {
 				// Skip TLS verification for proxy, if -insecure specified
 				c.WithTransport(&http.Transport{
@@ -212,7 +213,7 @@ func main() {
 					TLSClientConfig: &tls.Config{InsecureSkipVerify: *insecure},
 				})
 			}
-
+			
 			if *timeout == -1 {
 				// Start scraping
 				c.Visit(url)
@@ -220,47 +221,48 @@ func main() {
 				c.Wait()
 			} else {
 				finished := make(chan int, 1)
-
-				go func() {
-					// Start scraping
-					c.Visit(url)
-					// Wait until threads are finished
-					c.Wait()
-					finished <- 0
-				}()
-
-				select {
-				case _ = <-finished: // the crawling finished before the timeout
-					close(finished)
-					continue
-				case <-time.After(time.Duration(*timeout) * time.Second): // timeout reached
-					log.Println("[timeout] " + url)
-					continue
-
+			
+					go func() {
+						// Start scraping
+						c.Visit(url)
+						// Wait until threads are finished
+						c.Wait()
+						finished <- 0
+					}()
+			
+					select {
+						case _ = <-finished: // the crawling finished before the timeout
+							close(finished)
+							continue
+						case <-time.After(time.Duration(*timeout) * time.Second): // timeout reached
+							log.Println("[timeout] " + url)
+							continue
+			
+						}
+					}
+			
+				}
+				if err := s.Err(); err != nil {
+				fmt.Fprintln(os.Stderr, "reading standard input:", err)
+			}
+			close(results)
+		}()
+			
+		w := bufio.NewWriter(os.Stdout)
+		defer w.Flush()
+		if *unique {
+			for res := range results {
+				if isUnique(res) {
+					fmt.Fprintln(w, res)
 				}
 			}
-
 		}
-		if err := s.Err(); err != nil {
-			fmt.Fprintln(os.Stderr, "reading standard input:", err)
-		}
-		close(results)
-	}()
-
-	w := bufio.NewWriter(os.Stdout)
-	defer w.Flush()
-	if *unique {
 		for res := range results {
-			if isUnique(res) {
-				fmt.Fprintln(w, res)
-			}
+			fmt.Fprintln(w, res)
 		}
-	}
-	for res := range results {
-		fmt.Fprintln(w, res)
+			
 	}
 
-}
 
 // parseHeaders does validation of headers input and saves it to a formatted map.
 func parseHeaders(rawHeaders string) error {
