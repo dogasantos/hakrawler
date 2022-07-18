@@ -110,8 +110,6 @@ func main() {
 				colly.Async(true),
 			)
 
-			
-
 			// set a page size limit
 			if *maxSize != -1 {
 				c.MaxBodySize = *maxSize * 1024
@@ -177,6 +175,7 @@ func main() {
 					}
 				})
 			}
+			
 			if *findpassform {
 				c.OnHTML("body", func(e *colly.HTMLElement) {
 					dom := e.DOM
